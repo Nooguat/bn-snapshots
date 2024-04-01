@@ -1,5 +1,6 @@
 #include "snap_viewer.h"
 #include <QTreeView>
+#include <cstdint>
 #include <qabstractitemmodel.h>
 #include <qabstractitemview.h>
 #include <qboxlayout.h>
@@ -24,6 +25,11 @@ SnapTree::SnapTree(BinaryViewRef bv, UIActionContext ctx)  : QTreeView() {
 
 void SnapTree::mouseDoubleClickEvent(QMouseEvent* event){
     auto database = m_bv->GetFile()->GetDatabase();
+    auto index = this->selectedIndexes()[0];
+    auto val = this->model()->index(index.row(), 1);
+    auto id = this->model()->data(val);
+    auto u_id = id.toString().toInt();
+    database->SetCurrentSnapshot(u_id);
     m_ctx.context->getCurrentActionHandler()->executeAction("Restart Binary Ninja and Reopen Files");
     close();
 }
@@ -32,6 +38,10 @@ void SnapTree::keyPressEvent(QKeyEvent* event){
     if(event->key() == Qt::Key_Return){
         auto database = m_bv->GetFile()->GetDatabase();
         auto index = this->selectedIndexes()[0];
+        auto val = this->model()->index(index.row(), 1);
+        auto id = this->model()->data(val);
+        auto u_id = id.toString().toInt();
+        database->SetCurrentSnapshot(u_id);
         // TODO Set the current snapshot to the given index
         m_ctx.context->getCurrentActionHandler()->executeAction("Restart Binary Ninja and Reopen Files");
         event->accept();
